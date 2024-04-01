@@ -116,10 +116,14 @@ class canOD:
         # for i in data:
         #     print("Data[%04x]" % i )
         buffer = bytearray(0)
-        buffer.append( data[5])
+        # buffer.append( data[5])
+        # buffer.append( data[4])
+        # buffer.append( data[7])
+        # buffer.append( data[6])
         buffer.append( data[4])
-        buffer.append( data[7])
+        buffer.append( data[5])
         buffer.append( data[6])
+        buffer.append( data[7])
         
         self.dpmuDebugFile.write(buffer)   
         self.numberOfBlocks = self.numberOfBlocks + 1
@@ -1455,15 +1459,16 @@ class App(customtkinter.CTk):
 
     def state_read_state_event(self):
         #print("state_button READ click")
-        state.ccs=0x40
-        state.setSubIndex(OD.S_DPMU_OPERATION_CURRENT_STATE)
-        state.set_data_byte4(0)
-        state.sendCanMessage()
-        self.switches_inrush_read_event()
-        self.switches_load_read_event()
-        self.switches_input_read_event()
-        self.switches_share_read_event()
-        self.state_read_button.after(1000, self.state_read_state_event)
+        if( canOD.sdoBlockTransferOngoing == 0 ): 
+            state.ccs=0x40
+            state.setSubIndex(OD.S_DPMU_OPERATION_CURRENT_STATE)
+            state.set_data_byte4(0)
+            state.sendCanMessage()
+            self.switches_inrush_read_event()
+            self.switches_load_read_event()
+            self.switches_input_read_event()
+            self.switches_share_read_event()
+            self.state_read_button.after(1000, self.state_read_state_event)
 
     def state_reboot_event(self):
         print("state_button REBOOT click")
@@ -1776,13 +1781,13 @@ def sdo_block_transfer(data):
     # print("canOD.sdoBlockTransferOngoing {:01x}".format(canOD.sdoBlockTransferOngoing))
     index = (data[2] << 8) | data[1]
 
-    debuglog.writeDataToLogFile(data)
+    
 
     if 1 == canOD.sdoBlockTransferOngoing:
         messageSent = 0
         canOD.ackSeq += 1
         # print("canOD.ackSeq {:04x}".format(canOD.ackSeq))
-
+        debuglog.writeDataToLogFile(data)
         if 0 == canOD.ackSeq%4: # block size = 4
             print("SDO BLOCK TRANSFER DONE")
             canOD.ackSeq = data[0] & 0x7f
@@ -1808,7 +1813,7 @@ def sdo_block_transfer(data):
                 # debuglog.set_data_byte7(0)
                 # debuglog.sendCanMessage()
             messageSent = 1
-
+            
         if 0x80 == data[0] & 0x80: # SDO Block transfer last segment
             canOD.sdoBlockTransferOngoing = 0
             if 0 == messageSent:
@@ -1824,7 +1829,9 @@ def sdo_block_transfer(data):
                 debuglog.set_data_byte6(0)
                 debuglog.set_data_byte7(0)
                 debuglog.sendCanMessage()
+                #debuglog.writeDataToLogFile(data)
                 debuglog.closeDPMULogFile()
+                
                 canOD.sdoBlockTransferOngoing = 0
     else:
         if 0xc1 == data[0] & 0xe1: # SDO Block transfer initate transfer block end
