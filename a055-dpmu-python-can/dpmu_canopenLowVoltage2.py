@@ -1,6 +1,7 @@
 import sys, os, datetime
 from os import path
 from tkinter.constants import DISABLED
+from test.test_typechecks import SubInt
 
 # update mypath - 'canlib32.dll' must recide here
 my_path = 'C:\Program Files\Kvaser\Drivers'
@@ -170,8 +171,12 @@ def tearDownChannel(ch):
     ch.close()
 
 class App(customtkinter.CTk):
+    cellVoltage = {}
+    
     def __init__(self):
         super().__init__()
+
+        
 
         # configure window
         self.title("CustomTkinter complex_example.py")
@@ -761,11 +766,13 @@ class App(customtkinter.CTk):
             self.state_of_charge_2_entry.grid(row=i+rownr, column=0, padx=(20, 0), pady=(5), sticky="nsew")
             self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
             self.state_of_charge_2_label.grid(row=i, column=1, padx=(5), sticky="nsew")
+            self.cellVoltage[OD.S_STATE_OF_CHARGE_OF_ENERGY_CELL_01+(i-1)]=self.state_of_charge_2_entry
         for i in range(16, 31):
             self.state_of_charge_2_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=50, justify="right", placeholder_text="20")
             self.state_of_charge_2_entry.grid(row=i-15, column=2, padx=(20, 0), pady=(5), sticky="nsew")
             self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
             self.state_of_charge_2_label.grid(row=i-15, column=3, padx=(5), sticky="nsew")
+            self.cellVoltage[OD.S_STATE_OF_CHARGE_OF_ENERGY_CELL_16+(i-16)]=self.state_of_charge_2_entry
         self.cell_progressbar_charge = customtkinter.CTkProgressBar(self.state_of_cell_frame, orientation="vertical")
         self.cell_progressbar_charge.grid(row=1, column=4, rowspan=15, padx=(20, 10), pady=(10, 10), sticky="ns")
 
@@ -1109,7 +1116,13 @@ class App(customtkinter.CTk):
 
     ### energy cell
     def energy_cell_charge_read_event(self):
-        pass
+        for i in range( 0 , 30):
+            energy_cell.ccs = 0x40
+            energy_cell.subIndex = OD.S_STATE_OF_CHARGE_OF_ENERGY_CELL_01+i
+            energy_cell.set_data_byte4(0)
+            energy_cell.sendCanMessage()
+            timer.sleep(10/1000)
+            
 
     def energy_cell_health_read_event(self):
         pass
@@ -1858,8 +1871,9 @@ def can_input_event(msg):
     # print("index {:04x}".format(index))
     subIndex = data[3]
     # print("subIndex {:02x}".format(subIndex))
-    value = data[4] +1
-    value16 = (data[4]<<8) + data[5] +1
+    value = data[4]
+    #value16 = (data[4]<<8) + data[5]
+    value16 = (data[5]<<8) + data[4]
     # print("value   ", value)
     # print("value16 ", value16)
     # print("data[0] ", hex(data[0]))
@@ -1980,7 +1994,11 @@ def can_input_event(msg):
                         app.energy_cell_min_volt_entry.insert(0,value)
                         placeholder_text = app.energy_cell_min_volt_entry.get()
                         print("placeholder_text ",placeholder_text)
-
+                    case _:
+                        if (subIndex >= OD.S_STATE_OF_CHARGE_OF_ENERGY_CELL_01) and (subIndex <= OD.S_STATE_OF_CHARGE_OF_ENERGY_CELL_30):
+                            app.cellVoltage[subIndex].delete(0, customtkinter.END)
+                            app.cellVoltage[subIndex].insert(0, "{:.2f}".format( float(value)/16 ) )
+                        
             if index == OD.I_DPMU_STATE:
                 if 0 == msg.data[4]:
                     app.state_idle_button.configure(fg_color="blue")
