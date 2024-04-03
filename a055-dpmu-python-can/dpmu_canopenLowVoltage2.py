@@ -117,10 +117,9 @@ class canOD:
         # for i in data:
         #     print("Data[%04x]" % i )
         buffer = bytearray(0)
-        # buffer.append( data[5])
-        # buffer.append( data[4])
-        # buffer.append( data[7])
-        # buffer.append( data[6])
+        buffer.append( data[1])
+        buffer.append( data[2])
+        buffer.append( data[3])
         buffer.append( data[4])
         buffer.append( data[5])
         buffer.append( data[6])
@@ -130,6 +129,7 @@ class canOD:
         self.numberOfBlocks = self.numberOfBlocks + 1
         
     def closeDPMULogFile(self):
+        self.dpmuDebugFile.flush()
         self.dpmuDebugFile.close()
         print("Number of blocks read:" + str( self.numberOfBlocks) )
         print("DPMU Log file created:" + self.dpmuDebugFileName)
@@ -386,7 +386,7 @@ class App(customtkinter.CTk):
         rownr += 1
         self.read_power_load_current = customtkinter.CTkCheckBox(master=self.voltages_frame)
         self.read_power_load_current.grid(row=rownr, column=0, columnspan=3, pady=(20, 0), padx=20, sticky="w")
-        self.read_power_load_current.configure(state="disabled", text="LAOD CURRENT", fg_color="red")
+        self.read_power_load_current.configure(state="disabled", text="LOAD CURRENT", fg_color="red")
         self.read_power_load_current_button = customtkinter.CTkButton(self.voltages_frame, command=self.read_power_load_current_event, width=20, text = "R")
         self.read_power_load_current_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
         # self.over_current_load.deselect()
@@ -1017,7 +1017,7 @@ class App(customtkinter.CTk):
         read_power.sendCanMessage()
 
     def read_power_load_current_event(self):
-        read_power.subIndex = OD.S_READ_LOAD_CURRENT1
+        read_power.subIndex = OD.S_READ_LOAD_CURRENT
         read_power.sendCanMessage()
 
     def read_power_load_power_event(self):
@@ -1843,7 +1843,7 @@ def sdo_block_transfer(data):
                 debuglog.set_data_byte7(0)
                 debuglog.sendCanMessage()
                 #debuglog.writeDataToLogFile(data)
-                debuglog.closeDPMULogFile()
+                #debuglog.closeDPMULogFile()
                 
                 canOD.sdoBlockTransferOngoing = 0
     else:
@@ -1860,6 +1860,7 @@ def sdo_block_transfer(data):
             debuglog.sendCanMessage()
             canOD.ackSeq = 0
             canOD.sdoBlock = 0
+            debuglog.closeDPMULogFile()
 
 def can_input_event(msg):
     data = msg.data
@@ -2041,7 +2042,13 @@ def can_input_event(msg):
                         placeholder_text = app.energy_bank_safey_threshold_entry.get()
                         print("SAFETY_THRESHOLD_STATE_OF_CHARGE: ",placeholder_text)
                     case OD.S_STATE_OF_CHARGE_OF_ENERGY_BANK:
-                        app.cell_progressbar_charge.set(0.5)#value/int(app.energy_bank_max_volt_entry.get()))
+                        if int( app.energy_bank_max_volt_entry.get() ) > 0:
+                            progressBarValue = value/int(app.energy_bank_max_volt_entry.get())
+                        else:
+                            app.cell_progressbar_charge.set(0.01)
+                            app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
+                            pass
+                        app.cell_progressbar_charge.set(progressBarValue)#value/int(app.energy_bank_max_volt_entry.get()))
                         app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
                         if value > int(app.energy_bank_max_volt_entry.get()):
                             app.cell_progressbar_charge.configure(progress_color="red")
@@ -2087,6 +2094,7 @@ def can_input_event(msg):
                         # update new settings
                         # print("max: " + format(temp_max))
                         # print("hig: " + format(temp_highest_measured))
+                        print("Temperature at hottest point: ", value )
                         if value >= int(app.temperature_max_entry.get()):
                             app.temperature_sub_status.configure(bg_color="red", text="ALARM")
                         else:
