@@ -2256,8 +2256,9 @@ def can_input_event(msg):
                 " {:02x}".format(data[6]) +
                 " {:02x}".format(data[5]) +
                 " {:02x}".format(data[4]))
-        canOD.sdoBlock = 0
-        canOD.sdoBlockTransferOngoing = 0
+        # canOD.sdoBlock = 0
+        # canOD.sdoBlockTransferOngoing = 0
+        # canlog.closeDPMULogFile()
 
 if __name__ == "__main__":
     print("DPMU: HELLO\r\n")
