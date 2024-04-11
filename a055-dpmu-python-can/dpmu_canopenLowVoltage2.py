@@ -90,20 +90,26 @@ class canOD:
                                          flags=canlib.MessageFlag.STD)
         canopen_DPMU_A.write(frame)
 
-        # print("OD ccs {:02x}".format(self.ccs) +
-        #       " index {:04x}".format((self.indexHigh<<8) + self.indexLow) +
-        #       " subindex {:02x}".format(self.subIndex) +
-        #       " data: {:02x}".format(self.data_byte4) +
-        #       " {:02x}".format(self.data_byte5) +
-        #       " {:02x}".format(self.data_byte6) +
-        #       " {:02x}".format(self.data_byte7))
+        index = ((self.indexHigh<<8) + self.indexLow)
+        if(  (self.ccs == 0x2f) and ( ( index == OD.I_ENERGY_BANK_SUMMARY ) or ( index == OD.I_DC_BUS_VOLTAGE ) or ( index == OD.I_DPMU_STATE ) ) ):
+            print("OD ccs {:02x}".format(self.ccs) +
+                  " index {:04x}".format((self.indexHigh<<8) + self.indexLow) +
+                  " subindex {:02x}".format(self.subIndex) +
+                  " data: {:02x}".format(self.data_byte4) +
+                  " {:02x}".format(self.data_byte5) +
+                  " {:02x}".format(self.data_byte6) +
+                  " {:02x}".format(self.data_byte7))
 
-    def createDPMULogFile(self):
+    def createDPMULogFile(self, typeOfLog):
         fileCreated = False
         while (fileCreated == False):
             currentTimeStamp = timer.time()
             dateTimeStr =  datetime.datetime.fromtimestamp(currentTimeStamp).strftime("%Y%m%d_%H%M%S")               
-            self.dpmuDebugFileName = "c:\\DPMU_LOG\\DPMU_LOG_" + dateTimeStr + ".hex"
+            if( typeOfLog == OD.I_DEBUG_LOG):
+                self.dpmuDebugFileName = "c:\\DPMU_LOG\\DPMU_LOG_" + dateTimeStr + ".hex"
+            else:
+                self.dpmuDebugFileName = "c:\\DPMU_LOG\\DPMU_CAN_LOG_" + dateTimeStr + ".hex"
+                
             try:
                 self.dpmuDebugFile = open(self.dpmuDebugFileName, "wb")  
                 fileCreated = True
@@ -2021,7 +2027,8 @@ def can_input_event(msg):
                     app.state_regulate_button.configure(fg_color="blue")
                 else:
                     app.state_regulate_button.configure(fg_color="slategrey")
-                # print("DPMU state ")
+                
+                #print("DPMU state:", msg.data[4])
 
             if index == OD.I_ENERGY_BANK_SUMMARY:
                 match subIndex:
@@ -2221,7 +2228,7 @@ def can_input_event(msg):
                 print("S_DEBUG_LOG_READ")
                 canOD.sdoBlock = 1
                 canOD.sdoBlockTransferOngoing = 1
-                debuglog.createDPMULogFile()
+                debuglog.createDPMULogFile(OD.I_DEBUG_LOG)
                 debuglog.ccs = 0xA3
                 debuglog.set_data_byte1(0)
                 debuglog.set_data_byte2(0)
@@ -2233,9 +2240,12 @@ def can_input_event(msg):
                 debuglog.sendCanMessage()
                 
             if index == OD.I_CAN_LOG:
-                print("I_DEBUG_LOG SDO BLOCK INIT")
+                print("I_CAN_LOG SDO BLOCK INIT")
                 # if OD.S_DEBUG_LOG_READ == subIndex:
-                print("S_DEBUG_LOG_READ")
+                print("S_CAN_LOG_READ")
+                canOD.sdoBlock = 1
+                canOD.sdoBlockTransferOngoing = 1
+                debuglog.createDPMULogFile(OD.I_CAN_LOG)
                 canlog.ccs = 0xA3
                 canlog.set_data_byte1(0)
                 canlog.set_data_byte2(0)
@@ -2245,8 +2255,6 @@ def can_input_event(msg):
                 canlog.set_data_byte6(0)
                 canlog.set_data_byte7(0)
                 canlog.sendCanMessage()
-                canOD.sdoBlock = 1
-                canOD.sdoBlockTransferOngoing = 1
 
     if 0x80 == data[0]: # SDO Abort
         print(  "SDO ABORT  " +
