@@ -1928,16 +1928,23 @@ def can_input_event(msg):
                     app.state_initialize_button.configure(fg_color="blue")
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
-
-                if 8 == msg.data[4]:
+                    
+                if ( msg.data[4] >= 4 ) and ( msg.data[4] <= 11 ):
                     app.state_charge_button.configure(fg_color="blue")
                 else:
                     app.state_charge_button.configure(fg_color="slategrey")
 
-                if 11 == msg.data[4]:
+                if  ( msg.data[4] >= 12 ) and ( msg.data[4] <= 13 ):
                     app.state_regulate_button.configure(fg_color="blue")
                 else:
                     app.state_regulate_button.configure(fg_color="slategrey")
+                    
+                if  ( msg.data[4] >= 140 ) and ( msg.data[4] <= 149 ):
+                    app.state_regulate_button.configure(fg_color="blue")
+                else:
+                    app.state_regulate_button.configure(fg_color="slategrey")
+
+                    
                 print("DPMU state ")
 
             if index == OD.I_ENERGY_BANK_SUMMARY:

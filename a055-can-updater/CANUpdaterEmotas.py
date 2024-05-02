@@ -9,7 +9,6 @@ from CalcCRC import CalcCRC
 
 @dataclass
 class FirmWare:
-    nbrOfDomains: int
     domain: int
     filename: bytearray
 
@@ -21,8 +20,7 @@ class FirmWare:
 def download_firmware(firmware_file):
     print("Erase Program")
     # node.sdo.download(0x1F51, 1, 3)
-    #nodebl.sdo.download(0x1F51, fw.domain, bytes.fromhex('03'))
-    nodebl.sdo.download(0x1F51, 1, bytes.fromhex('03'))
+    nodebl.sdo.download(0x1F51, fw.domain, bytes.fromhex('03'))
     #0x67E:8: 0x2F 0x51 0x1F 0x01 0x03 0x00 0x00 0x00
 
     time.sleep(0.250)
@@ -30,8 +28,7 @@ def download_firmware(firmware_file):
     print("Waiting for erase done")
     # Check, that the erase is ready – read from 0x1F57:1 Bit 0 – busy flag
     while True:
-        #busyFlag = nodebl.sdo.upload(0x1F57, fw.domain)
-        busyFlag = nodebl.sdo.upload(0x1F57, 1)
+        busyFlag = nodebl.sdo.upload(0x1F57, fw.domain)
         print("busyFlag", format(busyFlag))
         # 0x67e:8: 0x40  0x57  0x1f  0x01  0x00  0x00  0x00  0x00
         # 0x5fe:8: 0x43  0x57  0x1f  0x01  0x02  0x00  0x00  0x00
@@ -54,15 +51,8 @@ def download_firmware(firmware_file):
     chunk_size = 7  # Adjust based on your requirements
     chunks = [firmware_data[i:i + chunk_size] for i in range(0, firmware_size, chunk_size)]
 
-    #Gustavo
-    # Number of domains available
-    nbrOfDomains = nodebl.sdo.download(0x1F50, 0, 1, force_segment=True)
-    print("Number of domains %d" % nbrOfDomains )
-
-
     print("SDO Domain Transfer")
-    #nodebl.sdo.download(0x1F50, fw.domain, firmware_data, force_segment=True)
-    nodebl.sdo.download(0x1F50, 1, firmware_data, force_segment=True)
+    nodebl.sdo.download(0x1F50, fw.domain, firmware_data, force_segment=True)
 
     time.sleep(2)
 
@@ -107,7 +97,7 @@ def InBootloader():
 
     # Check, that the erase is ready – read from 0x1F57:1 Bit 0 – busy flag
     while True:
-        busyFlag = nodebl.sdo.upload(0x1F57, 1)
+        busyFlag = nodebl.sdo.upload(0x1F57, fw.domain)
         print("busyFlag", format(busyFlag))
         # 0x67e:8: 0x40  0x57  0x1f  0x01  0x00  0x00  0x00  0x00
         # 0x5fe:8: 0x43  0x57  0x1f  0x01  0x02  0x00  0x00  0x00
@@ -191,7 +181,7 @@ if arg_len == 2:
     fw.domain = domain
     fw.filename = filename
 else:
-    print("Usage: .\CANUpdaterEmotas.py <domain> <filename>")
+    print("Usage: .\CANUpdaterEmotas_BAD.py <domain> <filename>")
     print("       <domain> [1..2], 1 = CPU1, 2 = CPU2")
     print("       <filename> name of the file with the new FW, full/relative path")
 

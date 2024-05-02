@@ -2,6 +2,8 @@ import sys, os, datetime
 from os import path
 from tkinter.constants import DISABLED
 from test.test_typechecks import SubInt
+from enum import Enum
+
 
 # update mypath - 'canlib32.dll' must recide here
 my_path = 'C:\Program Files\Kvaser\Drivers'
@@ -23,6 +25,33 @@ from gen_indices import OD
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+
+class DPMUState(Enum):
+    Idle = 0
+    Initialize = 1             
+    SoftstartInit = 2          
+    Softstart = 3              
+    TrickleChargeInit = 4      
+    TrickleChargeDelay = 5     
+    TrickleCharge = 6          
+    ChargeInit = 7              
+    Charge =8                   
+    ChargeStop =9                 
+    ChargeConstantVoltageInit = 10
+    ChargeConstantVoltage = 11   
+    RegulateInit = 12             
+    Regulate=13                   
+    RegulateStop=14               
+    RegulateVoltageInit = 140
+    RegulateVoltage = 141
+    Fault = 15                    
+    FaultDelay=16                 
+    Keep=17                       
+    BalancingInit=18              
+    Balancing=19 
+    CC_Charge=20 
+    StopEPWMs=21 
+    ChargeRamp=22
 
 class canOD:
     sdoBlock=0
@@ -179,6 +208,9 @@ def tearDownChannel(ch):
 class App(customtkinter.CTk):
     cellVoltage = {}
     
+    dpmuCurrentState = 0
+    stateReadUpdateTime = 1000
+
     def __init__(self):
         super().__init__()
 
@@ -892,6 +924,7 @@ class App(customtkinter.CTk):
         self.slider_charge.configure(command=self.cell_progressbar_charge.set)
         self.slider_heatlh.configure(command=self.cell_progressbar_health.set)
 
+        self.state_read_state_event()
 
     ### DC BUS
     def voltages_max_allowed_dc_bus_voltage_event(self):
@@ -1477,6 +1510,7 @@ class App(customtkinter.CTk):
         state.sendCanMessage()
 
     def state_read_state_event(self):
+        
         #print("state_button READ click")
         if( canOD.sdoBlockTransferOngoing == 0 ): 
             state.ccs=0x40
@@ -1487,7 +1521,27 @@ class App(customtkinter.CTk):
             self.switches_load_read_event()
             self.switches_input_read_event()
             self.switches_share_read_event()
-            self.state_read_button.after(1000, self.state_read_state_event)
+            match self.dpmuCurrentState:                
+                case [ DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.TrickleCharge, DPMUState.TrickleChargeDelay, DPMUState.TrickleChargeInit ]:
+                    self.energy_cell_charge_read_event()
+                    self.bank_charge_read_event()
+                    self.stateReadUpdateTime = 2500
+                case [ DPMUState.RegulateInit, DPMUState.Regulate, DPMUState.RegulateVoltageInit, DPMUState.RegulateVoltage ]:
+                    self.energy_cell_charge_read_event()
+                    self.bank_charge_read_event()
+                    self.stateReadUpdateTime = 2500
+                case [ DPMUState.Idle ]:
+                    self.stateReadUpdateTime = 2500
+                case [ DPMUState.SoftstartInit, DPMUState.Softstart ]:
+                    self.stateReadUpdateTime = 500
+                case [ DPMUState.Fault, DPMUState.FaultDelay ]:
+                    self.stateReadUpdateTime = 500                    
+                case _:
+                    self.energy_cell_charge_read_event()
+                    self.bank_charge_read_event()
+                    self.stateReadUpdateTime = 5000
+                    
+            self.state_read_button.after(self.stateReadUpdateTime, self.state_read_state_event)
 
     def state_reboot_event(self):
         print("state_button REBOOT click")
@@ -2006,7 +2060,8 @@ def can_input_event(msg):
                             app.cellVoltage[subIndex].delete(0, customtkinter.END)
                             app.cellVoltage[subIndex].insert(0, "{:.2f}".format( float(value)/16 ) )
                         
-            if index == OD.I_DPMU_STATE:
+            if index == OD.I_DPMU_STATE:                
+                app.dpmuCurrentState = msg.data[4]
                 if 0 == msg.data[4]:
                     app.state_idle_button.configure(fg_color="blue")
                     #self.switches_load_event.progress_color="red"
@@ -2018,11 +2073,17 @@ def can_input_event(msg):
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
 
-                if 8 == msg.data[4]:
+                if ( msg.data[4] >= 4 ) and ( msg.data[4] <= 11 ):
+                    app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="blue")
                 else:
                     app.state_charge_button.configure(fg_color="slategrey")
-
+                
+                if  ( msg.data[4] >= 140 ) and ( msg.data[4] <= 149 ):
+                    app.state_regulate_button.configure(fg_color="blue")
+                else:
+                    app.state_regulate_button.configure(fg_color="slategrey")
+                
                 if 13 == msg.data[4]:
                     app.state_regulate_button.configure(fg_color="blue")
                 else:

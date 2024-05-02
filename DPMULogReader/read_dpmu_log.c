@@ -31,11 +31,12 @@ typedef struct debug_log
     int16_t RegulateAvgVStore;
     int16_t RegulateAvgVbus;
     int16_t RegulateIRef;
+	uint16_t ILoop_PiOutput;
     int16_t cellVoltage[NUMBER_OF_CELLS];
     int16_t CurrentState; // State of CPU2 state machine
     uint16_t counter;
     uint32_t CurrentTime;
-    uint16_t elapsed_time;
+    uint16_t elapsed_time;	
 } debug_log_t;
 
 
@@ -80,7 +81,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	
-	sprintf(csvLine, "%s", "VBus\tAvgVbus\tVStore\tAvgVStore\tInputCurrent\tOutputCurrent\tSupercapCurrent\tLLC1_Current\tLLC2_Current\tRegAvgVStore\tRegAvgVbus\tRegAvgInputCurrent\t"
+	sprintf(csvLine, "%s", "VBus\tAvgVbus\tVStore\tAvgVStore\tInputCurrent\tOutputCurrent\tSupercapCurrent\tILoopPiOutput\tLLC1_Current\tLLC2_Current\tRegAvgVStore\tRegAvgVbus\tRegAvgInputCurrent\t"
 						"RegAvgOutputCurrent\tRegIref\tTBase\tTMain\tTMezz\tTPWRBank\tCounter\tCurrentState\tElapsed_time\tTime");
 	for(int i=0;i<30;i++) {
 		sprintf(str, "\tCEL_%02d", i);
@@ -159,6 +160,7 @@ void log_debug_read_from_ram(debug_log_t readBack)	{
         printf( "IF_1:[%03d] ", readBack.IF_1);
         printf( "ISen1:[%03d] ", readBack.ISen1);
         printf( "ISen2:[%03d] ", readBack.ISen2);
+		printf( "ILoopPiOutput:[%03d] ", readBack.ILoop_PiOutput);
         printf( "I_Dab2:[%03d] ", readBack.I_Dab2);
         printf( "I_Dab3:[%03d]\r\n", readBack.I_Dab3);
         printf( "\r\nRegulate Vars:\r\n");
@@ -245,6 +247,7 @@ void create_csv_line(char *csvLine, debug_log_t readBack) {
 	sprintf( str, "%6.2f\t", (float)readBack.IF_1/10);                                strcat( csvLine, str);
 	sprintf( str, "%6.2f\t", (float)readBack.ISen1/10);                               strcat( csvLine, str);
 	sprintf( str, "%6.2f\t", (float)readBack.ISen2/10);                               strcat( csvLine, str);
+	sprintf( str, "%6.2f\t", (float)readBack.ILoop_PiOutput/100);                     strcat( csvLine, str);
 	sprintf( str, "%6.2f\t", (float)readBack.I_Dab2/100);                             strcat( csvLine, str);
 	sprintf( str, "%6.2f\t", (float)readBack.I_Dab3/100);                             strcat( csvLine, str);
 	sprintf( str, "%6.2f\t", (float)readBack.RegulateAvgVStore/10);                   strcat( csvLine, str);
