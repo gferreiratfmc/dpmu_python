@@ -414,36 +414,50 @@ class App(customtkinter.CTk):
         self.current_max_ess_current_entry.insert(0,"2")
 
         rownr += 1
-        self.read_power_dc_voltage = customtkinter.CTkCheckBox(master=self.voltages_frame)
-        self.read_power_dc_voltage.grid(row=rownr, column=0, columnspan=3, pady=(20, 0), padx=20, sticky="w")
-        self.read_power_dc_voltage.configure(state="disabled", text="DC BUS VOLTAGE", fg_color="red")
-        self.read_power_dc_voltage_button = customtkinter.CTkButton(self.voltages_frame, command=self.read_power_dc_voltage_event, width=20, text = "R")
-        self.read_power_dc_voltage_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        # self.over_current_load.deselect()
+        self.VI_sub_frame = customtkinter.CTkFrame(self.voltages_frame)
+        self.VI_sub_frame.grid(row=rownr, column=0, columnspan=3, padx=(10, 10), pady=10, sticky="")
+        self.VI_sub_frame_label = customtkinter.CTkLabel(master=self.VI_sub_frame, text="VOLTAGES AND CURRENTS", font=customtkinter.CTkFont(size=20, weight="bold"))
+        self.VI_sub_frame_label.grid(row=rownr, column=0, columnspan=2, padx=10, pady=10, sticky="")
 
         rownr += 1
-        self.read_power_load_current = customtkinter.CTkCheckBox(master=self.voltages_frame)
-        self.read_power_load_current.grid(row=rownr, column=0, columnspan=3, pady=(20, 0), padx=20, sticky="w")
-        self.read_power_load_current.configure(state="disabled", text="LOAD CURRENT", fg_color="red")
-        self.read_power_load_current_button = customtkinter.CTkButton(self.voltages_frame, command=self.read_power_load_current_event, width=20, text = "R")
-        self.read_power_load_current_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        # self.over_current_load.deselect()
+        self.read_power_dc_voltage_entry = customtkinter.CTkEntry(master=self.VI_sub_frame)
+        self.read_power_dc_voltage_entry.grid(row=rownr, column=0, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_dc_voltage_label = customtkinter.CTkLabel(self.VI_sub_frame, text="DC BUS VOLTAGE")
+        self.read_power_dc_voltage_label.grid(row=rownr, column=1, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_dc_voltage_button = customtkinter.CTkButton(self.VI_sub_frame, command=self.read_power_dc_voltage_event, width=20, text = "R")
+        self.read_power_dc_voltage_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
 
         rownr += 1
-        self.read_power_load_power = customtkinter.CTkCheckBox(master=self.voltages_frame)
-        self.read_power_load_power.grid(row=rownr, column=0, columnspan=3, pady=(20, 0), padx=20, sticky="w")
-        self.read_power_load_power.configure(state="disabled", text="LOAD POWER", fg_color="red")
-        self.read_power_load_power_button = customtkinter.CTkButton(self.voltages_frame, command=self.read_power_load_power_event, width=20, text = "R")
-        self.read_power_load_power_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        # self.over_current_input.select()
+        self.read_power_dc_vstore_entry = customtkinter.CTkEntry(master=self.VI_sub_frame)
+        self.read_power_dc_vstore_entry.grid(row=rownr, column=0, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_dc_vstore_label = customtkinter.CTkLabel(self.VI_sub_frame, text="SUPERCAP VOLTAGE")
+        self.read_power_dc_vstore_label.grid(row=rownr, column=1, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_dc_vstore_button = customtkinter.CTkButton(self.VI_sub_frame, command=self.read_power_dc_vstore_event, width=20, text = "R")
+        self.read_power_dc_vstore_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
 
         rownr += 1
-        self.read_power_input_power = customtkinter.CTkCheckBox(master=self.voltages_frame)
-        self.read_power_input_power.grid(row=rownr, column=0, columnspan=3, pady=(20, 0), padx=20, sticky="w")
-        self.read_power_input_power.configure(state="disabled", text="INPUT POWER", fg_color="red")
-        self.read_power_input_power_button = customtkinter.CTkButton(self.voltages_frame, command=self.read_power_input_power_event, width=20, text = "R")
-        self.read_power_input_power_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        # self.over_current_input.select()
+        self.read_power_input_current_entry = customtkinter.CTkEntry(master=self.VI_sub_frame)
+        self.read_power_input_current_entry.grid(row=rownr, column=0, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_input_current_label = customtkinter.CTkLabel(self.VI_sub_frame, text="INPUT CURRENT")
+        self.read_power_input_current_label.grid(row=rownr, column=1, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_input_current_button = customtkinter.CTkButton(self.VI_sub_frame, command=self.read_power_input_current_event, width=20, text = "R")
+        self.read_power_input_current_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
+
+        rownr += 1
+        self.read_power_load_current_entry = customtkinter.CTkEntry(master=self.VI_sub_frame)
+        self.read_power_load_current_entry.grid(row=rownr, column=0, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_input_current_label = customtkinter.CTkLabel(self.VI_sub_frame, text="LOAD CURRENT")
+        self.read_power_input_current_label.grid(row=rownr, column=1, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_load_current_button = customtkinter.CTkButton(self.VI_sub_frame, command=self.read_power_load_current_event, width=20, text = "R")
+        self.read_power_load_current_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
+        
+        rownr += 1
+        self.read_power_supercap_current_entry = customtkinter.CTkEntry(master=self.VI_sub_frame)
+        self.read_power_supercap_current_entry.grid(row=rownr, column=0, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_supercap_current_label = customtkinter.CTkLabel(self.VI_sub_frame, text="SUPERCAP CURRENT")
+        self.read_power_supercap_current_label.grid(row=rownr, column=1, pady=(20, 0), padx=20, sticky="w")
+        self.read_power_supercap_current_button = customtkinter.CTkButton(self.VI_sub_frame, command=self.read_power_supercap_current_event, width=20, text = "R")
+        self.read_power_supercap_current_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
 
 
         # create tabview
@@ -464,7 +478,7 @@ class App(customtkinter.CTk):
                                                             "RDNT_CAP", "RDNT_CAP_W_SUPP", "RDNT_BAT", "RDNT_BAT_W_SUPP",
                                                             "SUPP_CAP", "SUPP_BAT"])
         self.combobox_DPMU_Type.grid(row=1, column=0, padx=(20,10), pady=(10, 10))
-        self.combobox_DPMU_Type.set("CHOOSE")
+        self.combobox_DPMU_Type.set("DFLT_CAP")
         self.combobox_DPMU_Type_button = customtkinter.CTkButton(self.tabview.tab("DPMU Type"), command=self.read_DPMU_Type_event, width=20, text = "R")
         self.combobox_DPMU_Type_button.grid(row=1, column=1, padx=(20,20))
         self.string_input_button = customtkinter.CTkButton(self.tabview.tab("DPMU Type"), text="Open CTkInputDialog",
@@ -815,26 +829,61 @@ class App(customtkinter.CTk):
         self.cell_progressbar_charge.grid(row=1, column=4, rowspan=15, padx=(20, 10), pady=(10, 10), sticky="ns")
 
 
-        rownr = 0
-        self.state_of_charge_logo_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="CELL HEALTH [%F]", font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.state_of_charge_logo_label.grid(row=0, column=5, columnspan=3, padx=20, pady=(20, 10))
-        self.state_of_charge_cell_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.energy_cell_health_read_event, width=20, text = "R")
-        self.state_of_charge_cell_health_read_button.grid(row=rownr, column=8, padx=(0,20), pady=5, sticky="w")
-        self.state_of_charge_cell_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_health_read_event, width=20, text = "R")
-        self.state_of_charge_cell_health_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+        # rownr = 0
+        # self.state_of_charge_logo_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="CELL HEALTH [%F]", font=customtkinter.CTkFont(size=20, weight="bold"))
+        # self.state_of_charge_logo_label.grid(row=0, column=5, columnspan=3, padx=20, pady=(20, 10))
+        # self.state_of_charge_cell_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.energy_cell_health_read_event, width=20, text = "R")
+        # self.state_of_charge_cell_health_read_button.grid(row=rownr, column=8, padx=(0,20), pady=5, sticky="w")
+        # self.state_of_charge_cell_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_health_read_event, width=20, text = "R")
+        # self.state_of_charge_cell_health_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
 
-        for i in range(1, 16):
-            self.state_of_charge_2_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=50, justify="right", placeholder_text="20")
-            self.state_of_charge_2_entry.grid(row=i+rownr, column=5, padx=(20, 0), pady=(5), sticky="nsew")
-            self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
-            self.state_of_charge_2_label.grid(row=i, column=6, padx=(5), sticky="nsew")
-        for i in range(16, 31):
-            self.state_of_charge_2_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=50, justify="right", placeholder_text="20")
-            self.state_of_charge_2_entry.grid(row=i-15, column=7, padx=(20, 0), pady=(5), sticky="nsew")
-            self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
-            self.state_of_charge_2_label.grid(row=i-15, column=8, padx=(5), sticky="nsew")
-        self.cell_progressbar_health = customtkinter.CTkProgressBar(self.state_of_cell_frame, orientation="vertical")
-        self.cell_progressbar_health.grid(row=1, column=9, rowspan=15, padx=(20, 10), pady=(10, 10), sticky="ns")
+        rownr = 0
+        self.state_of_charge_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="STATE OF CHARGE [%]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
+        self.state_of_charge_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
+        rownr += 1
+        self.state_of_charge_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
+        self.state_of_charge_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_charge_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="%")
+        self.state_of_charge_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_charge_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_charge_read_event, width=20, text = "R")
+        self.state_of_charge_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+        
+        rownr += 1
+        self.state_of_health_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="STATE OF HEALTH [%]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
+        self.state_of_health_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
+        rownr += 1
+        self.state_of_health_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
+        self.state_of_health_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_health_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="%")
+        self.state_of_health_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_health_read_event, width=20, text = "R")
+        self.state_of_health_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+
+
+        rownr += 1
+        self.state_of_remaining_energy_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="REMAINING ENERGY [J]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
+        self.state_of_remaining_energy_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
+        rownr += 1
+        self.state_of_remaining_energy_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
+        self.state_of_remaining_energy_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_remaining_energy_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="J")
+        self.state_of_remaining_energy_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_remaining_energy_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_remaining_energy_read_event, width=20, text = "R")
+        self.state_of_remaining_energy_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+
+        
+        # for i in range(1, 16):
+        #     self.state_of_charge_2_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=50, justify="right", placeholder_text="20")
+        #     self.state_of_charge_2_entry.grid(row=i+rownr, column=5, padx=(20, 0), pady=(5), sticky="nsew")
+        #     self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
+        #     self.state_of_charge_2_label.grid(row=i, column=6, padx=(5), sticky="nsew")
+        # for i in range(16, 31):
+        #     self.state_of_charge_2_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=50, justify="right", placeholder_text="20")
+        #     self.state_of_charge_2_entry.grid(row=i-15, column=7, padx=(20, 0), pady=(5), sticky="nsew")
+        #     self.state_of_charge_2_label = customtkinter.CTkLabel(self.state_of_cell_frame, text=f'{i}')
+        #     self.state_of_charge_2_label.grid(row=i-15, column=8, padx=(5), sticky="nsew")
+        # self.cell_progressbar_health = customtkinter.CTkProgressBar(self.state_of_cell_frame, orientation="vertical")
+        # self.cell_progressbar_health.grid(row=1, column=9, rowspan=15, padx=(20, 10), pady=(10, 10), sticky="ns")
 
         rownr = 4
         self.state_of_charge_set_cell_value_frame = customtkinter.CTkFrame(self.state_of_charge_frame, width=140, corner_radius=10)
@@ -915,14 +964,14 @@ class App(customtkinter.CTk):
 
 
         # for testing and for show
-        self.state_of_charge_logo_label = customtkinter.CTkLabel(self.state_of_charge_frame, text="BAR", font=customtkinter.CTkFont(size=20, weight="bold"))
-        self.state_of_charge_logo_label.grid(row=0, column=3, columnspan=2, padx=20, pady=(20, 10))
-        self.slider_charge = customtkinter.CTkSlider(self.state_of_charge_frame, orientation="vertical")
-        self.slider_charge.grid(row=1, column=3, rowspan=15, padx=(10, 10), pady=(10, 10), sticky="ns")
-        self.slider_heatlh = customtkinter.CTkSlider(self.state_of_charge_frame, orientation="vertical")
-        self.slider_heatlh.grid(row=1, column=4, rowspan=15, padx=(10, 10), pady=(10, 10), sticky="ns")
-        self.slider_charge.configure(command=self.cell_progressbar_charge.set)
-        self.slider_heatlh.configure(command=self.cell_progressbar_health.set)
+        # self.state_of_charge_logo_label = customtkinter.CTkLabel(self.state_of_charge_frame, text="BAR", font=customtkinter.CTkFont(size=20, weight="bold"))
+        # self.state_of_charge_logo_label.grid(row=0, column=3, columnspan=2, padx=20, pady=(20, 10))
+        # self.slider_charge = customtkinter.CTkSlider(self.state_of_charge_frame, orientation="vertical")
+        # self.slider_charge.grid(row=1, column=3, rowspan=15, padx=(10, 10), pady=(10, 10), sticky="ns")
+        # self.slider_heatlh = customtkinter.CTkSlider(self.state_of_charge_frame, orientation="vertical")
+        # self.slider_heatlh.grid(row=1, column=4, rowspan=15, padx=(10, 10), pady=(10, 10), sticky="ns")
+        # self.slider_charge.configure(command=self.cell_progressbar_charge.set)
+        # self.slider_heatlh.configure(command=self.cell_progressbar_health.set)
 
         self.state_read_state_event()
 
@@ -1055,9 +1104,15 @@ class App(customtkinter.CTk):
         read_power.subIndex = OD.S_READ_VOLTAGE_AT_DC_BUS
         read_power.sendCanMessage()
 
+    def read_power_dc_vstore_event(self):
+        self.bank_charge_read_event()
+
     def read_power_load_current_event(self):
         read_power.subIndex = OD.S_READ_LOAD_CURRENT
         read_power.sendCanMessage()
+    
+    def read_power_supercap_current_event(self):
+        read_current_ess_current.sendCanMessage()
 
     def read_power_load_power_event(self):
         read_power.subIndex = OD.S_POWER_CONSUMED_BY_LOAD
@@ -1067,6 +1122,10 @@ class App(customtkinter.CTk):
         read_power.subIndex = OD.S_POWER_FROM_DC_INPUT
         read_power.sendCanMessage()
 
+    def read_power_input_current_event(self):
+        self.read_power_dc_voltage_event()
+        self.read_power_input_power_event()
+        
 
     ### store parameters
     def store_all_params_event(self):
@@ -1119,37 +1178,37 @@ class App(customtkinter.CTk):
         print("type string: ", type_string)
         match type_string:
             case "DFLT_CAP":
-                type = 0
+                dpmu_type_val = 0
             case "DFLT_CAP_W_RDNT":
-                type = 1
+                dpmu_type_val = 1
             case "DFLT_CAP_W_SUPP":
-                type = 2
+                dpmu_type_val = 2
             case "DFLT_CAP_W_RDNT_SUPP":
-                type = 3
+                dpmu_type_val = 3
             case "DFLT_BAT":
-                type = 4
+                dpmu_type_val = 4
             case "DFLT_BAT_W_RDNT":
-                type = 5
+                dpmu_type_val = 5
             case "DFLT_BAT_W_SUPP":
-                type = 6
+                dpmu_type_val = 6
             case "DFLT_BAT_W_RDNT_SUPP":
-                type = 7
+                dpmu_type_val = 7
             case "RDNT_CAP":
-                type = 8
+                dpmu_type_val = 8
             case "RDNT_CAP_W_SUPP":
-                type = 9
+                dpmu_type_val = 9
             case "RDNT_BAT":
-                type = 10
+                dpmu_type_val = 10
             case "RDNT_BAT_W_SUPP":
-                type = 11
+                dpmu_type_val = 11
             case "SUPP_CAP":
-                type = 12
+                dpmu_type_val = 12
             case "SUPP_BAT":
-                type = 13
+                dpmu_type_val = 13
             case _:
                 print("BAD TYPE")
                 return
-        dpmu_type_od.set_data_byte4(type)
+        dpmu_type_od.set_data_byte4( dpmu_type_val )
         dpmu_type_od.sendCanMessage()
 
 
@@ -1294,6 +1353,10 @@ class App(customtkinter.CTk):
         energy_bank.subIndex = OD.S_STATE_OF_HEALTH_OF_ENERGY_BANK
         energy_bank.sendCanMessage()
 
+    def bank_remaining_energy_read_event(self):
+        energy_bank.ccs = 0x40
+        energy_bank.subIndex = OD.S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK
+        energy_bank.sendCanMessage()
 
     ### TEMPERATURES
     def temperature_max_allowed_event(self):
@@ -1483,6 +1546,9 @@ class App(customtkinter.CTk):
         timer.sleep(10/1000)
         self.voltages_short_circuit_voltage_event()
         timer.sleep(10/1000)
+        dpmu_type_cboBox = app.combobox_DPMU_Type.get() 
+        self.set_DPMU_Type_event( dpmu_type_cboBox )
+        timer.sleep(10/1000)
         state.ccs=0x2F
         state.setSubIndex(OD.S_DPMU_OPERATION_REQUEST_STATE)
         state.set_data_byte4(1) # state_initialize
@@ -1522,13 +1588,16 @@ class App(customtkinter.CTk):
             self.switches_input_read_event()
             self.switches_share_read_event()
             match self.dpmuCurrentState:                
-                case [ DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.TrickleCharge, DPMUState.TrickleChargeDelay, DPMUState.TrickleChargeInit ]:
+                case [ DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.TrickleCharge, 
+                      DPMUState.TrickleChargeDelay, DPMUState.TrickleChargeInit, DPMUState.BalancingInit, DPMUState.Balancing ]:
                     self.energy_cell_charge_read_event()
                     self.bank_charge_read_event()
-                    self.stateReadUpdateTime = 2500
+                    self.bank_remaining_energy_read_event()    
+                    self.stateReadUpdateTime = 1000
                 case [ DPMUState.RegulateInit, DPMUState.Regulate, DPMUState.RegulateVoltageInit, DPMUState.RegulateVoltage ]:
                     self.energy_cell_charge_read_event()
                     self.bank_charge_read_event()
+                    self.bank_remaining_energy_read_event()    
                     self.stateReadUpdateTime = 2500
                 case [ DPMUState.Idle ]:
                     self.stateReadUpdateTime = 2500
@@ -1539,6 +1608,20 @@ class App(customtkinter.CTk):
                 case _:
                     self.energy_cell_charge_read_event()
                     self.bank_charge_read_event()
+                    timer.sleep(10/1000)
+                    self.read_power_dc_vstore_event()
+                    timer.sleep(10/1000)
+                    self.read_power_input_current_event()
+                    timer.sleep(10/1000)
+                    self.read_power_dc_voltage_event()
+                    timer.sleep(10/1000)
+                    self.read_power_load_current_event()
+                    timer.sleep(10/1000)
+                    self.read_power_supercap_current_event()                    
+                    timer.sleep(10/1000)
+                    self.bank_health_read_event()  
+                    timer.sleep(10/1000)
+                    self.bank_remaining_energy_read_event()                  
                     self.stateReadUpdateTime = 5000
                     
             self.state_read_button.after(self.stateReadUpdateTime, self.state_read_state_event)
@@ -1991,45 +2074,53 @@ def can_input_event(msg):
                 print("placeholder_text ",placeholder_text)
 
             if index == OD.I_ESS_CURRENT:
-                value = float(value) / 16
+                #Twos complement
+                if (value & (1 << (7))) != 0: # if sign bit is set e.g., 8bit: 128-255
+                    value = value - (1 << 8)        # compute negative value
+                value = float(value) / 16.0
                 app.current_max_ess_current_entry.delete(0,customtkinter.END)
                 app.current_max_ess_current_entry.insert(0,value)
-                placeholder_text = app.current_max_ess_current_entry.get()
+                placeholder_text = app.current_max_ess_current_entry.get()                               
                 print("ess_current ",placeholder_text)
+                app.read_power_supercap_current_entry.delete(0,customtkinter.END)
+                app.read_power_supercap_current_entry.insert(0,value)
 
             if index == OD.I_READ_POWER:
                 print(int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()))
                 match subIndex:
                     case OD.S_READ_VOLTAGE_AT_DC_BUS:
                         print("S_READ_VOLTAGE_AT_DC_BUS")
-                        if (value > int(app.voltages_max_allowed_dc_bus_voltage_entry.get())) | (value < int(app.voltages_min_allowed_dc_bus_voltage_entry.get())):
-                            app.read_power_dc_voltage.configure(state="enabled", fg_color="red")
-                            app.read_power_dc_voltage.select()
-                            print("dc bus over/under voltage {:02x}".format(value))
-                        else:
-                            app.read_power_dc_voltage.configure(state="disabled")
-                            app.read_power_dc_voltage.deselect()
-                            print("no dc bus over/under Voltage {:02x}".format(value))
-                    case OD.S_POWER_FROM_DC_INPUT:
+                        print("dc bus over/under voltage {:02x}".format(value))
+                        app.read_power_dc_voltage_entry.delete(0, customtkinter.END)
+                        app.read_power_dc_voltage_entry.insert(0, value)
+                    case OD.S_POWER_FROM_DC_INPUT:                        
                         print("S_POWER_FROM_DC_INPUT")
-                        if value > int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()):
-                            app.read_power_input_power.configure(state="enabled")
-                            app.read_power_input_power.select()
+                        if value > int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()):                            
+                            # app.read_power_input_power.configure(state="enabled")
+                            # app.read_power_input_power.select()
                             print("dc input overcurrent")
                         else:
-                            app.read_power_input_power.configure(state="disabled")
-                            app.read_power_input_power.deselect()
+                            # app.read_power_input_power.configure(state="disabled")
+                            # app.read_power_input_power.deselect()
                             print("no dc input overcurrent")
+                        try:
+                            dc_bus_voltage = app.read_power_dc_voltage_entry.get()
+                            if( dc_bus_voltage == "0"): 
+                                app.read_power_input_current_entry.delete(0, customtkinter.END)
+                                app.read_power_input_current_entry.insert(0, 0)
+                            else:
+                                inputCurrent = float( value ) / float( dc_bus_voltage )
+                                app.read_power_input_current_entry.delete(0, customtkinter.END)
+                                app.read_power_input_current_entry.insert(0, "{:.1f}".format(inputCurrent) )
+                        except:
+                            app.read_power_input_current_entry.delete(0, customtkinter.END)
+                            app.read_power_input_current_entry.insert(0, "Invalid DC BUS VOLTAGE")
+                            
                     case OD.S_READ_LOAD_CURRENT:
                         print("S_READ_LOAD_CURRENT")
-                        if value > int(app.current_max_load_current_entry.get()):
-                            app.read_power_load_current.configure(state="enabled")
-                            app.read_power_load_current.select()
-                            print("dc load overcurrent")
-                        else:
-                            app.read_power_load_current.configure(state="disabled")
-                            app.read_power_load_current.deselect()
-                            print("no dc load overcurrent")
+                        app.read_power_load_current_entry.delete(0, customtkinter.END)
+                        app.read_power_load_current_entry.insert(0, float(value) / 16 )
+                        
                     case OD.S_POWER_CONSUMED_BY_LOAD:
                         print("S_POWER_CONSUMED_BY_LOAD")
                         if value > int(app.current_max_load_current_entry.get()):
@@ -2110,12 +2201,18 @@ def can_input_event(msg):
                         placeholder_text = app.energy_bank_safey_threshold_entry.get()
                         print("SAFETY_THRESHOLD_STATE_OF_CHARGE: ",placeholder_text)
                     case OD.S_STATE_OF_CHARGE_OF_ENERGY_BANK:
-                        if int( app.energy_bank_max_volt_entry.get() ) > 0:
-                            progressBarValue = value/int(app.energy_bank_max_volt_entry.get())
-                        else:
-                            app.cell_progressbar_charge.set(0.01)
-                            app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
-                            pass
+                        app.state_of_charge_entry.delete(0, customtkinter.END)
+                        app.state_of_charge_entry.insert(0, value)
+                        
+                        # app.read_power_dc_vstore_entry.delete(0, customtkinter.END)
+                        # app.read_power_dc_vstore_entry.insert(0, value)
+                        # if int( app.energy_bank_max_volt_entry.get() ) > 0:
+                        #     progressBarValue = value/int(app.energy_bank_max_volt_entry.get())
+                        # else:
+                        #     app.cell_progressbar_charge.set(0.01)
+                        #     app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
+                        #     pass
+                        progressBarValue = value / 100
                         app.cell_progressbar_charge.set(progressBarValue)#value/int(app.energy_bank_max_volt_entry.get()))
                         app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
                         if value > int(app.energy_bank_max_volt_entry.get()):
@@ -2125,9 +2222,12 @@ def can_input_event(msg):
                         if value < int(app.energy_bank_min_volt_entry.get()):
                             app.cell_progressbar_charge.configure(progress_color="red")
                     case OD.S_STATE_OF_HEALTH_OF_ENERGY_BANK:
-                        app.cell_progressbar_health.set(value)
+                        #app.cell_progressbar_health.set(value)
+                        app.state_of_health_entry.delete(0, customtkinter.END)
+                        app.state_of_health_entry.insert(0, "%.1f" % (value/2) )
                     case OD.S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK:
-                        pass
+                        app.state_of_remaining_energy_entry.delete(0, customtkinter.END)
+                        app.state_of_remaining_energy_entry.insert(0, "%.1f" % (value) )
                     case OD.S_STACK_TEMPERATURE:
                         app.temperature_stack_entry.delete(0,customtkinter.END)
                         app.temperature_stack_entry.insert(0,value)
@@ -2316,6 +2416,7 @@ def can_input_event(msg):
                 canlog.set_data_byte6(0)
                 canlog.set_data_byte7(0)
                 canlog.sendCanMessage()
+                
 
     if 0x80 == data[0]: # SDO Abort
         print(  "SDO ABORT  " +
@@ -2325,8 +2426,8 @@ def can_input_event(msg):
                 " {:02x}".format(data[6]) +
                 " {:02x}".format(data[5]) +
                 " {:02x}".format(data[4]))
-        # canOD.sdoBlock = 0
-        # canOD.sdoBlockTransferOngoing = 0
+        canOD.sdoBlock = 0
+        canOD.sdoBlockTransferOngoing = 0
         # canlog.closeDPMULogFile()
 
 if __name__ == "__main__":
@@ -2350,6 +2451,7 @@ if __name__ == "__main__":
     power_pudget_dc_input               = canOD(id=nodeId, ccs=0x2B, indexHigh=high_byte(OD.I_POWER_BUDGET_DC_INPUT), indexLow=low_byte(OD.I_POWER_BUDGET_DC_INPUT), subIndex=0)
     current_max_load_current            = canOD(id=nodeId, ccs=0x2B, indexHigh=high_byte(OD.I_MAXIMUM_ALLOWED_LOAD_POWER), indexLow=low_byte(OD.I_MAXIMUM_ALLOWED_LOAD_POWER), subIndex=0)
     current_max_ess_current             = canOD(id=nodeId, ccs=0x2F, indexHigh=high_byte(OD.I_ESS_CURRENT), indexLow=low_byte(OD.I_ESS_CURRENT), subIndex=0)
+    read_current_ess_current             = canOD(id=nodeId, ccs=0x40, indexHigh=high_byte(OD.I_ESS_CURRENT), indexLow=low_byte(OD.I_ESS_CURRENT), subIndex=0)
     read_power                          = canOD(id=nodeId, ccs=0x40, indexHigh=high_byte(OD.I_READ_POWER), indexLow=low_byte(OD.I_READ_POWER), subIndex=0)
 
     energy_cell                         = canOD(id=nodeId, ccs=0x2F, indexHigh=high_byte(OD.I_ENERGY_CELL_SUMMARY), indexLow=low_byte(OD.I_ENERGY_CELL_SUMMARY), subIndex=0)

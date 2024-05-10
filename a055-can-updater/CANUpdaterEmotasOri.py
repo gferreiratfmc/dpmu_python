@@ -204,7 +204,7 @@ network = canopen.Network()
 # network.connect(bustype='socketcan', channel='can0')
 network.connect(bustype='kvaser', channel=0, bitrate=125000)
 # network.connect(bustype='pcan', channel='PCAN_USBBUS1', bitrate=250000)
-# network.connect(bustype='ixxat', channel=0, bitrate=250000)
+# network.connect(bustype='ixxat', channel=0, bitrate=125000)
 # network.connect(bustype='vector', app_name='CANalyzer', channel=0, bitrate=250000)
 # network.connect(bustype='nican', channel='CAN0', bitrate=250000)
 
