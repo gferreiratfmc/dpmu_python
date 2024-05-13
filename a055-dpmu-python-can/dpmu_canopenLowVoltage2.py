@@ -1,4 +1,4 @@
-import sys, os, datetime
+import sys, os, datetime, math
 from os import path
 from tkinter.constants import DISABLED
 from test.test_typechecks import SubInt
@@ -842,22 +842,22 @@ class App(customtkinter.CTk):
         self.state_of_charge_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
         rownr += 1
         self.state_of_charge_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
-        self.state_of_charge_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_charge_entry.grid(row=rownr, column=5, padx=(20, 0), pady=(5), sticky="nsew")
         self.state_of_charge_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="%")
-        self.state_of_charge_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_charge_unit_label.grid(row=rownr, column=6, padx=(5), sticky="nsew")
         self.state_of_charge_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_charge_read_event, width=20, text = "R")
-        self.state_of_charge_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+        self.state_of_charge_read_button.grid(row=rownr, column=7, padx=(0,20), pady=5, sticky="")
         
         rownr += 1
         self.state_of_health_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="STATE OF HEALTH [%]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
         self.state_of_health_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
         rownr += 1
         self.state_of_health_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
-        self.state_of_health_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_health_entry.grid(row=rownr, column=5, padx=(20, 0), pady=(5), sticky="nsew")
         self.state_of_health_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="%")
-        self.state_of_health_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_health_unit_label.grid(row=rownr, column=6, padx=(5), sticky="nsew")
         self.state_of_health_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_health_read_event, width=20, text = "R")
-        self.state_of_health_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+        self.state_of_health_read_button.grid(row=rownr, column=7, padx=(0,20), pady=5, sticky="")
 
 
         rownr += 1
@@ -865,11 +865,11 @@ class App(customtkinter.CTk):
         self.state_of_remaining_energy_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
         rownr += 1
         self.state_of_remaining_energy_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
-        self.state_of_remaining_energy_entry.grid(row=rownr, column=6, padx=(20, 0), pady=(5), sticky="nsew")
+        self.state_of_remaining_energy_entry.grid(row=rownr, column=5, padx=(10, 0), pady=(5), sticky="nsew")
         self.state_of_remaining_energy_unit_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="J")
-        self.state_of_remaining_energy_unit_label.grid(row=rownr, column=7, padx=(5), sticky="nsew")
+        self.state_of_remaining_energy_unit_label.grid(row=rownr, column=6, padx=(5), sticky="nsew")
         self.state_of_remaining_energy_read_button = customtkinter.CTkButton(self.state_of_cell_frame, command=self.bank_remaining_energy_read_event, width=20, text = "R")
-        self.state_of_remaining_energy_read_button.grid(row=rownr, column=9, padx=(0,20), pady=5, sticky="")
+        self.state_of_remaining_energy_read_button.grid(row=rownr, column=7, padx=(0,20), pady=5, sticky="")
 
         
         # for i in range(1, 16):
@@ -1599,12 +1599,10 @@ class App(customtkinter.CTk):
                     self.bank_charge_read_event()
                     self.bank_remaining_energy_read_event()    
                     self.stateReadUpdateTime = 2500
-                case [ DPMUState.Idle ]:
-                    self.stateReadUpdateTime = 2500
                 case [ DPMUState.SoftstartInit, DPMUState.Softstart ]:
-                    self.stateReadUpdateTime = 500
+                    self.stateReadUpdateTime = 250
                 case [ DPMUState.Fault, DPMUState.FaultDelay ]:
-                    self.stateReadUpdateTime = 500                    
+                    self.stateReadUpdateTime = 250                    
                 case _:
                     self.energy_cell_charge_read_event()
                     self.bank_charge_read_event()
@@ -2079,11 +2077,11 @@ def can_input_event(msg):
                     value = value - (1 << 8)        # compute negative value
                 value = float(value) / 16.0
                 app.current_max_ess_current_entry.delete(0,customtkinter.END)
-                app.current_max_ess_current_entry.insert(0,value)
+                app.current_max_ess_current_entry.insert(0,"%.2f" % value)
                 placeholder_text = app.current_max_ess_current_entry.get()                               
                 print("ess_current ",placeholder_text)
                 app.read_power_supercap_current_entry.delete(0,customtkinter.END)
-                app.read_power_supercap_current_entry.insert(0,value)
+                app.read_power_supercap_current_entry.insert(0, "%.2f" % value)
 
             if index == OD.I_READ_POWER:
                 print(int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()))
@@ -2118,8 +2116,11 @@ def can_input_event(msg):
                             
                     case OD.S_READ_LOAD_CURRENT:
                         print("S_READ_LOAD_CURRENT")
+                        if (value & (1 << (7))) != 0: # if sign bit is set e.g., 8bit: 128-255
+                            value = value - (1 << 8)        # compute negative value
+                        loadCurrent = float(value) / 16.0
                         app.read_power_load_current_entry.delete(0, customtkinter.END)
-                        app.read_power_load_current_entry.insert(0, float(value) / 16 )
+                        app.read_power_load_current_entry.insert(0, "{:.1f}".format(loadCurrent) )
                         
                     case OD.S_POWER_CONSUMED_BY_LOAD:
                         print("S_POWER_CONSUMED_BY_LOAD")
@@ -2159,7 +2160,7 @@ def can_input_event(msg):
                 else:
                     app.state_idle_button.configure(fg_color="slategrey")
 
-                if 1 == msg.data[4]:
+                if msg.data[4] in [1, 2, 201, 3]:
                     app.state_initialize_button.configure(fg_color="blue")
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
@@ -2201,33 +2202,37 @@ def can_input_event(msg):
                         placeholder_text = app.energy_bank_safey_threshold_entry.get()
                         print("SAFETY_THRESHOLD_STATE_OF_CHARGE: ",placeholder_text)
                     case OD.S_STATE_OF_CHARGE_OF_ENERGY_BANK:
+                        print("BANK PERCENT %d" % value)
                         app.state_of_charge_entry.delete(0, customtkinter.END)
                         app.state_of_charge_entry.insert(0, value)
-                        
-                        # app.read_power_dc_vstore_entry.delete(0, customtkinter.END)
-                        # app.read_power_dc_vstore_entry.insert(0, value)
+                        currentVStoreRatio = math.sqrt( float( value ) / 100.0 )
+                        maxVoltageEnergyBank = float ( app.energy_bank_max_volt_entry.get() )
+                        calcSupercapVoltage = ( ( 0.8733 * maxVoltageEnergyBank ) *  currentVStoreRatio  )
+                        app.read_power_dc_vstore_entry.delete(0, customtkinter.END)
+                        app.read_power_dc_vstore_entry.insert(0, ("%.1f" % calcSupercapVoltage) )
                         # if int( app.energy_bank_max_volt_entry.get() ) > 0:
                         #     progressBarValue = value/int(app.energy_bank_max_volt_entry.get())
                         # else:
                         #     app.cell_progressbar_charge.set(0.01)
                         #     app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
                         #     pass
-                        progressBarValue = value / 100
-                        app.cell_progressbar_charge.set(progressBarValue)#value/int(app.energy_bank_max_volt_entry.get()))
+                        progressBarValue = currentVStoreRatio
+                        app.cell_progressbar_charge.set( progressBarValue )#value/int(app.energy_bank_max_volt_entry.get()))
                         app.cell_progressbar_charge.configure(progress_color="DeepSkyBlue3")
-                        if value > int(app.energy_bank_max_volt_entry.get()):
+                        if calcSupercapVoltage > int(app.energy_bank_max_volt_entry.get()):
                             app.cell_progressbar_charge.configure(progress_color="red")
-                        if value < int(app.energy_bank_safey_threshold_entry.get()):
+                        if calcSupercapVoltage < int(app.energy_bank_safey_threshold_entry.get()):
                             app.cell_progressbar_charge.configure(progress_color="yellow")
-                        if value < int(app.energy_bank_min_volt_entry.get()):
+                        if calcSupercapVoltage < int(app.energy_bank_min_volt_entry.get()):
                             app.cell_progressbar_charge.configure(progress_color="red")
                     case OD.S_STATE_OF_HEALTH_OF_ENERGY_BANK:
                         #app.cell_progressbar_health.set(value)
                         app.state_of_health_entry.delete(0, customtkinter.END)
                         app.state_of_health_entry.insert(0, "%.1f" % (value/2) )
                     case OD.S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK:
+                        print("S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK %.1f" % float(value) )
                         app.state_of_remaining_energy_entry.delete(0, customtkinter.END)
-                        app.state_of_remaining_energy_entry.insert(0, "%.1f" % (value) )
+                        app.state_of_remaining_energy_entry.insert(0, "%.1f" % ( float(value) ) )
                     case OD.S_STACK_TEMPERATURE:
                         app.temperature_stack_entry.delete(0,customtkinter.END)
                         app.temperature_stack_entry.insert(0,value)
