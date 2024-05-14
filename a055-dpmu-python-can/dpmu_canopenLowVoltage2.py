@@ -2093,7 +2093,7 @@ def can_input_event(msg):
                         app.read_power_dc_voltage_entry.insert(0, value)
                     case OD.S_POWER_FROM_DC_INPUT:                        
                         print("S_POWER_FROM_DC_INPUT")
-                        if value > int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()):                            
+                        if value16 > int(app.power_pudget_dc_input_available_power_budget_input_event_entry.get()):                            
                             # app.read_power_input_power.configure(state="enabled")
                             # app.read_power_input_power.select()
                             print("dc input overcurrent")
@@ -2107,7 +2107,7 @@ def can_input_event(msg):
                                 app.read_power_input_current_entry.delete(0, customtkinter.END)
                                 app.read_power_input_current_entry.insert(0, 0)
                             else:
-                                inputCurrent = float( value ) / float( dc_bus_voltage )
+                                inputCurrent = float( value16 ) / float( dc_bus_voltage )
                                 app.read_power_input_current_entry.delete(0, customtkinter.END)
                                 app.read_power_input_current_entry.insert(0, "{:.1f}".format(inputCurrent) )
                         except:
@@ -2203,6 +2203,7 @@ def can_input_event(msg):
                         print("SAFETY_THRESHOLD_STATE_OF_CHARGE: ",placeholder_text)
                     case OD.S_STATE_OF_CHARGE_OF_ENERGY_BANK:
                         print("BANK PERCENT %d" % value)
+                        value = value / 2;
                         app.state_of_charge_entry.delete(0, customtkinter.END)
                         app.state_of_charge_entry.insert(0, value)
                         currentVStoreRatio = math.sqrt( float( value ) / 100.0 )
@@ -2230,9 +2231,9 @@ def can_input_event(msg):
                         app.state_of_health_entry.delete(0, customtkinter.END)
                         app.state_of_health_entry.insert(0, "%.1f" % (value/2) )
                     case OD.S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK:
-                        print("S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK %.1f" % float(value) )
+                        print("S_REMAINING_ENERGY_TO_MIN_SOC_AT_ENERGY_BANK %d" % float(value16) )
                         app.state_of_remaining_energy_entry.delete(0, customtkinter.END)
-                        app.state_of_remaining_energy_entry.insert(0, "%.1f" % ( float(value) ) )
+                        app.state_of_remaining_energy_entry.insert(0, "%d" % ( float(value16) ) )
                     case OD.S_STACK_TEMPERATURE:
                         app.temperature_stack_entry.delete(0,customtkinter.END)
                         app.temperature_stack_entry.insert(0,value)
