@@ -541,7 +541,7 @@ class App(customtkinter.CTk):
         self.temperature_max_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
         self.temperature_max_button = customtkinter.CTkButton(self.temperature_frame, command=self.temperature_max_allowed_read_event, width=20, text = "R")
         self.temperature_max_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        self.temperature_max_entry.insert(0,"0")
+        self.temperature_max_entry.insert(0,"85")
 
         rownr += 1
         self.temperature_high_entry = customtkinter.CTkEntry(self.temperature_frame, width=50, justify="right", placeholder_text="0")
@@ -552,7 +552,7 @@ class App(customtkinter.CTk):
         self.temperature_high_button.grid(row=rownr, column=2, padx=(0,20), pady=5, sticky="w")
         self.temperature_high_button = customtkinter.CTkButton(self.temperature_frame, command=self.temperature_high_limit_read_event, width=20, text = "R")
         self.temperature_high_button.grid(row=rownr, column=3, padx=(0,20), pady=5, sticky="w")
-        self.temperature_high_entry.insert(0,"0")
+        self.temperature_high_entry.insert(0,"70")
 
         rownr += 1
         self.temperature_energy_bank_entry = customtkinter.CTkEntry(self.temperature_frame, width=50, justify="right", placeholder_text="0")
@@ -850,7 +850,7 @@ class App(customtkinter.CTk):
         
         rownr += 1
         self.state_of_health_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="STATE OF HEALTH [%]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
-        self.state_of_health_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
+        self.state_of_health_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(5))
         rownr += 1
         self.state_of_health_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
         self.state_of_health_entry.grid(row=rownr, column=5, padx=(20, 0), pady=(5), sticky="nsew")
@@ -862,7 +862,7 @@ class App(customtkinter.CTk):
 
         rownr += 1
         self.state_of_remaining_energy_label = customtkinter.CTkLabel(self.state_of_cell_frame, text="REMAINING ENERGY [J]") #, font=customtkinter.CTkFont(size=10, weight="bold"))
-        self.state_of_remaining_energy_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(20, 10))
+        self.state_of_remaining_energy_label.grid(row=rownr, column=5, columnspan=3, padx=20, pady=(5))
         rownr += 1
         self.state_of_remaining_energy_entry = customtkinter.CTkEntry(self.state_of_cell_frame, width=25, justify="right", placeholder_text="20")
         self.state_of_remaining_energy_entry.grid(row=rownr, column=5, padx=(10, 0), pady=(5), sticky="nsew")
@@ -1546,6 +1546,10 @@ class App(customtkinter.CTk):
         timer.sleep(10/1000)
         self.voltages_short_circuit_voltage_event()
         timer.sleep(10/1000)
+        self.temperature_max_allowed_event()
+        timer.sleep(10/1000)        
+        self.temperature_high_limit_event()
+        timer.sleep(10/1000)
         dpmu_type_cboBox = app.combobox_DPMU_Type.get() 
         self.set_DPMU_Type_event( dpmu_type_cboBox )
         timer.sleep(10/1000)
@@ -1598,7 +1602,7 @@ class App(customtkinter.CTk):
                     self.energy_cell_charge_read_event()
                     self.bank_charge_read_event()
                     self.bank_remaining_energy_read_event()    
-                    self.stateReadUpdateTime = 2500
+                    self.stateReadUpdateTime = 200
                 case [ DPMUState.SoftstartInit, DPMUState.Softstart ]:
                     self.stateReadUpdateTime = 250
                 case [ DPMUState.Fault, DPMUState.FaultDelay ]:
@@ -1619,8 +1623,20 @@ class App(customtkinter.CTk):
                     timer.sleep(10/1000)
                     self.bank_health_read_event()  
                     timer.sleep(10/1000)
-                    self.bank_remaining_energy_read_event()                  
-                    self.stateReadUpdateTime = 5000
+                    self.bank_remaining_energy_read_event()   
+                    timer.sleep(10/1000)
+                    self.temperature_energy_bank_read_event()                 
+                    timer.sleep(10/1000)
+                    self.temperature_stack_read_event()
+                    timer.sleep(10/1000)
+                    self.temperature_mezzanine_read_event()
+                    timer.sleep(10/1000)
+                    self.temperature_main_read_event()
+                    timer.sleep(10/1000)
+                    self.temperature_dsp_card_read_event()
+                    timer.sleep(10/1000)
+                    self.temperature_highest_read_event()
+                    self.stateReadUpdateTime = 2500
                     
             self.state_read_button.after(self.stateReadUpdateTime, self.state_read_state_event)
 
@@ -2165,18 +2181,18 @@ def can_input_event(msg):
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
 
-                if ( msg.data[4] >= 4 ) and ( msg.data[4] <= 11 ):
+                if ( msg.data[4] >= 4 ) and ( msg.data[4] <= 7 ):
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="blue")
+                elif ( msg.data[4] >=8 ) and ( msg.data[4] <=11 ) :
+                    app.chargingFlag = True
+                    app.state_charge_button.configure(fg_color="red")
                 else:
                     app.state_charge_button.configure(fg_color="slategrey")
                 
                 if  ( msg.data[4] >= 140 ) and ( msg.data[4] <= 149 ):
-                    app.state_regulate_button.configure(fg_color="blue")
-                else:
-                    app.state_regulate_button.configure(fg_color="slategrey")
-                
-                if 13 == msg.data[4]:
+                    app.state_regulate_button.configure(fg_color="red")
+                elif msg.data[4] in [12, 13, 14]:
                     app.state_regulate_button.configure(fg_color="blue")
                 else:
                     app.state_regulate_button.configure(fg_color="slategrey")
