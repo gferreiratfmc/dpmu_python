@@ -28,30 +28,31 @@ customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "gre
 
 class DPMUState(Enum):
     Idle = 0
-    Initialize = 1             
-    SoftstartInit = 2          
-    Softstart = 3              
-    TrickleChargeInit = 4      
-    TrickleChargeDelay = 5     
-    TrickleCharge = 6          
-    ChargeInit = 7              
-    Charge =8                   
-    ChargeStop =9                 
+    Initialize = 1
+    SoftstartInitDefault = 2
+    SoftstartInitRedundant = 201
+    Softstart = 3
+    TrickleChargeInit = 4
+    TrickleChargeDelay = 5
+    TrickleCharge = 6
+    ChargeInit = 7
+    Charge = 8
+    ChargeStop = 9
     ChargeConstantVoltageInit = 10
-    ChargeConstantVoltage = 11   
-    RegulateInit = 12             
-    Regulate=13                   
-    RegulateStop=14               
+    ChargeConstantVoltage = 11
+    RegulateInit = 12
+    Regulate = 13
+    RegulateStop = 14
     RegulateVoltageInit = 140
     RegulateVoltage = 141
-    Fault = 15                    
-    FaultDelay=16                 
-    Keep=17                       
-    BalancingInit=18              
-    Balancing=19 
-    CC_Charge=20 
-    StopEPWMs=21 
-    ChargeRamp=22
+    Fault = 15
+    FaultDelay = 16
+    Keep = 17
+    BalancingInit = 18
+    Balancing = 19
+    CC_Charge = 20
+    StopEPWMs = 21
+    ChargeRamp = 22
 
 class canOD:
     sdoBlock=0
@@ -178,14 +179,14 @@ class canOD:
 # switch_inrush.subIndex = 0x03 # SW_Qinb_State    - GLOAD_4 - J7.18
 # #Switch_State.subIndex = 0x04 # SW_Qinrush_State - GLOAD_1 - J9.3
 
-global switch_input_state
-switch_input_state = False
-global switch_load_state
-switch_load_state = False
-global switch_share_state
-switch_share_state = False
-global switches_inrush_state
-switches_inrush_state = False
+# global switch_input_state
+# switch_input_state = False
+# global switch_load_state
+# switch_load_state = False
+# global switch_share_state
+# switch_share_state = False
+# global switches_inrush_state
+# switches_inrush_state = False
 
 def setUpChannel(channel=0,
                  openFlags=canlib.canOPEN_ACCEPT_VIRTUAL,
@@ -210,11 +211,14 @@ class App(customtkinter.CTk):
     
     dpmuCurrentState = 0
     stateReadUpdateTime = 1000
+    
+    switch_input_state = False
+    switch_load_state = False
+    switch_share_state = False
+    switches_inrush_state = False
 
     def __init__(self):
         super().__init__()
-
-        
 
         # configure window
         self.title("CustomTkinter complex_example.py")
@@ -1515,7 +1519,7 @@ class App(customtkinter.CTk):
         state.sendCanMessage()
 
     def state_initialize_event(self):
-        print("state_button INIT click")
+        print("state_button INIT click")        
         self.time_set_event()
         timer.sleep(10/1000)
         self.current_available_power_budget_input_event()
@@ -1587,10 +1591,12 @@ class App(customtkinter.CTk):
             state.setSubIndex(OD.S_DPMU_OPERATION_CURRENT_STATE)
             state.set_data_byte4(0)
             state.sendCanMessage()
+            
             self.switches_inrush_read_event()
             self.switches_load_read_event()
             self.switches_input_read_event()
             self.switches_share_read_event()
+
             match self.dpmuCurrentState:                
                 case [ DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.TrickleCharge, 
                       DPMUState.TrickleChargeDelay, DPMUState.TrickleChargeInit, DPMUState.BalancingInit, DPMUState.Balancing ]:
@@ -1695,59 +1701,56 @@ class App(customtkinter.CTk):
     ### SWITCHES - SET
 
     def switches_inrush_event(self):
-        global switches_inrush_state
         switch_inrush.ccs = 0x2F
 
-        if switches_inrush_state:
-            switches_inrush_state = False
+        if app.switches_inrush_state:
+            # app.switches_inrush_state = False
             switch_inrush.set_data_byte4(0)
             # self.switches_inrush.progress_color="red"
         else:
-            switches_inrush_state = True
+            # app.switches_inrush_state = True
             switch_inrush.set_data_byte4(1)
             # self.switches_inrush.progress_color="green"
         switch_inrush.sendCanMessage()
         self.switches_inrush_read_event()
+        
     def switches_load_event(self):
-        global switch_load_state
         switch_load.ccs = 0x2F
 
-        if switch_load_state:
-            switch_load_state = False
+        if app.switch_load_state:
+            # switch_load_state = False
             switch_load.set_data_byte4(0)
             #self.switches_load_event.progress_color="red"
         else:
-            switch_load_state = True
+            # switch_load_state = True
             switch_load.set_data_byte4(1)
             #self.switches_load_event.progress_color="green"
-
         switch_load.sendCanMessage()
         self.switches_load_read_event()
+        
     def switches_share_event(self):
-        global switch_share_state
         switch_share.ccs = 0x2F
 
-        if switch_share_state:
-            switch_share_state = False
+        if app.switch_share_state:
+            # switch_share_state = False
             switch_share.set_data_byte4(0)
             #self.switches_share_event.progress_color="red"
         else:
-            switch_share_state = True
+            # switch_share_state = True
             switch_share.set_data_byte4(1)
             #self.switches_share_event.progress_color="green"
-
         switch_share.sendCanMessage()
         self.switches_share_read_event()
+        
     def switches_input_event(self):
-        global switch_input_state
         switch_input.ccs = 0x2F
 
-        if switch_input_state:
-            switch_input_state = False
+        if app.switch_input_state:
+            # switch_input_state = False
             switch_input.set_data_byte4(0)
             self.switches_input.progress_color="red"
         else:
-            switch_input_state = True
+            # switch_input_state = True
             switch_input.set_data_byte4(1)
             self.switches_input.progress_color="green"
 
@@ -2170,33 +2173,40 @@ def can_input_event(msg):
                         
             if index == OD.I_DPMU_STATE:                
                 app.dpmuCurrentState = msg.data[4]
-                if 0 == msg.data[4]:
+                if app.dpmuCurrentState == DPMUState.Idle:
                     app.state_idle_button.configure(fg_color="blue")
                     #self.switches_load_event.progress_color="red"
                 else:
                     app.state_idle_button.configure(fg_color="slategrey")
-
-                if msg.data[4] in [1, 2, 201, 3]:
+                if app.dpmuCurrentState in [DPMUState.Initialize , DPMUState.SoftstartInitDefault, DPMUState.SoftstartInitRedundant, DPMUState.Softstart ]:
                     app.state_initialize_button.configure(fg_color="blue")
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
 
-                if ( msg.data[4] >= 4 ) and ( msg.data[4] <= 7 ):
+                if ( app.dpmuCurrentState in [DPMUState.TrickleChargeInit, DPMUState.TrickleChargeDelay, DPMUState.TrickleCharge] ):
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="blue")
-                elif ( msg.data[4] >=8 ) and ( msg.data[4] <=11 ) :
+                elif ( app.dpmuCurrentState in [DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.ChargeStop] ):
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="red")
+                elif ( app.dpmuCurrentState in [DPMUState.ChargeConstantVoltageInit, DPMUState.ChargeConstantVoltage] ):
+                    app.chargingFlag = True
+                    app.state_charge_button.configure(fg_color="yellow")
                 else:
                     app.state_charge_button.configure(fg_color="slategrey")
                 
-                if  ( msg.data[4] >= 140 ) and ( msg.data[4] <= 149 ):
+                if  app.dpmuCurrentState in [DPMUState.RegulateInit, DPMUState.RegulateVoltage]:
                     app.state_regulate_button.configure(fg_color="red")
-                elif msg.data[4] in [12, 13, 14]:
+                elif app.dpmuCurrentState in [DPMUState.RegulateInit, DPMUState.Regulate, DPMUState.RegulateStop]:
                     app.state_regulate_button.configure(fg_color="blue")
                 else:
                     app.state_regulate_button.configure(fg_color="slategrey")
                 
+                if ( app.switches_inrush_state  == False and  app.switch_input_state == True and  
+                     app.switch_load_state == True and app.switch_share_state == True):
+                    app.state_initialize_button.configure(fg_color="green")
+                else:
+                    app.state_initialize_button.configure(fg_color="slategrey")
                 #print("DPMU state:", msg.data[4])
 
             if index == OD.I_ENERGY_BANK_SUMMARY:
@@ -2332,46 +2342,37 @@ def can_input_event(msg):
             if index == OD.I_SWITCH_STATE:
                 match subIndex:
                     case OD.S_SW_QINRUSH_STATE:
-                        global switch_inrush
                         if 0 == msg.data[4]:
-                            switch_inrush_state = False
+                            app.switch_inrush_state = False
                             app.switches_inrush.deselect()
-                            #self.switches_load_event.progress_color="red"
                         else:
-                            switch_inrush_state = True
+                            app.switch_inrush_state = True
                             app.switches_inrush.select()
-                            #self.switches_load_event.progress_color="green"
                         pass
                     case OD.S_SW_QLB_STATE:
-                        global switch_load_state
                         if 0 == msg.data[4]:
-                            switch_load_state = False
+                            app.switch_load_state = False
                             app.switches_load.deselect()
                             #self.switches_load_event.progress_color="red"
                         else:
-                            switch_load_state = True
+                            app.switch_load_state = True
                             app.switches_load.select()
                             #self.switches_load_event.progress_color="green"
                     case OD.S_SW_QSB_STATE:
-                        global switch_share_state
                         if 0 == msg.data[4]:
-                            switch_share_state = False
+                            app.switch_share_state = False
                             app.switches_share.deselect()
-                            #self.switches_load_event.progress_color="red"
                         else:
-                            switch_share_state = True
+                            app.switch_share_state = True
                             app.switches_share.select()
-                            #self.switches_load_event.progress_color="green"
+
                     case OD.S_SW_QINB_STATE:
-                        global switch_input_state
                         if 0 == msg.data[4]:
-                            switch_input_state = False
+                            app.switch_input_state = False
                             app.switches_input.deselect()
-                            #self.switches_load_event.progress_color="red"
                         else:
-                            switch_input_state = True
+                            app.switch_input_state = True
                             app.switches_input.select()
-                            #self.switches_load_event.progress_color="green"
 
             if index == OD.I_DPMU_POWER_SOURCE_TYPE:
                 match data[4]:
