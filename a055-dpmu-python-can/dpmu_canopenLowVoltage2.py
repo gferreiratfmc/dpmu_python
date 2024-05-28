@@ -87,6 +87,9 @@ class canOD:
         self.data_byte6 = data_byte6
         self.data_byte7 = data_byte7
 
+    def setID(self, nodeid):
+        self.id = 0x600 + nodeid
+
     def setSubIndex(self, subIndex):
         self.subIndex = subIndex
 
@@ -187,6 +190,8 @@ class canOD:
 # switch_share_state = False
 # global switches_inrush_state
 # switches_inrush_state = False
+global nmtNodeId
+nmtNodeId = 125
 
 def setUpChannel(channel=0,
                  openFlags=canlib.canOPEN_ACCEPT_VIRTUAL,
@@ -472,6 +477,7 @@ class App(customtkinter.CTk):
         self.tabview.add("DPMU Type")
         self.tabview.tab("DPMU Type").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         self.tabview.tab("Restore Parameters").grid_columnconfigure(0, weight=1)
+        self.tabview.add("Node ID")
 
         self.optionmenu_1 = customtkinter.CTkOptionMenu(self.tabview.tab("DPMU Type"), dynamic_resizing=False,
                                                         values=["Value 1", "Restore Parameters", "Value Long Long Long"])
@@ -522,6 +528,23 @@ class App(customtkinter.CTk):
         rownr += 1
         self.restore_mf_aparams_button = customtkinter.CTkButton(self.restore_parameters_frame, command=self.restore_mf_params_event, width=20, text = "MF PARAMETERS")
         self.restore_mf_aparams_button.grid(row=rownr, column=colnr, padx=(10,10), pady=(10,10), sticky="nsew")
+
+        self.nodeid_frame = customtkinter.CTkFrame(self.tabview.tab("Node ID"), width=140, corner_radius=10)
+        self.nodeid_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        rownr = 0
+        colnr = 0
+        self.nodeid_label = customtkinter.CTkLabel(self.nodeid_frame, text="UPDATE NODE ID", anchor="w")
+        self.nodeid_label.grid(row=rownr, column=1, padx=(5), sticky="nsew")
+        rownr += 1
+        self.nodeid_entry = customtkinter.CTkEntry(self.nodeid_frame, width=50, justify="right", placeholder_text="0")
+        self.nodeid_entry.grid(row=rownr, column=0, padx=(10, 10), pady=(10), sticky="nsew")
+        self.nodeid_entry.insert("0","125")
+        colnr += 1
+        self.nodeid_button = customtkinter.CTkButton(self.nodeid_frame, command=self.nodeid_event, width=20, text = "SET SERVER NODE ID")
+        self.nodeid_button.grid(row=rownr, column=colnr, padx=(10,10), pady=10, sticky="nsew")
+        rownr += 1
+        self.nodeid_gui_button = customtkinter.CTkButton(self.nodeid_frame, command=self.nodeid_gui_event, width=20, text = "SET GUI SENDING NODE ID")
+        self.nodeid_gui_button.grid(row=rownr, column=colnr, padx=(10,10), pady=10, sticky="nsew")
 
 
         # create row0-col0-master frame
@@ -1216,6 +1239,25 @@ class App(customtkinter.CTk):
         dpmu_type_od.sendCanMessage()
 
 
+    ### set nodeID
+    def nodeid_event(self):
+        nodeid_od.ccs = 0x2F
+        nodeId = int(self.nodeid_entry.get())
+        nodeid_od.set_data_byte4(nodeId)
+        nodeid_od.sendCanMessage()
+        global nmtNodeId
+        print(nmtNodeId)
+        print("Set server Node Id:", nodeId)
+
+    def nodeid_gui_event(self):
+        global nmtNodeId
+        nodeId = int(self.nodeid_entry.get())
+        setNodeId(nodeId)
+        nmtNodeId = nodeId
+        print(nmtNodeId)
+        print(nodeId)
+
+        
     ### energy cell
     def energy_cell_charge_read_event(self):
         for i in range( 0 , 30):
@@ -1656,31 +1698,36 @@ class App(customtkinter.CTk):
         print("nmt_reset_application_button click")
         # nmt.set_data_byte4(0x81) # Reset node
         # nmt = canOD(id=0, ccs=0x0C, indexHigh=0x81, indexLow=0x01) # FIXME NOT IN OD
-        canopen_DPMU_A.write_raw(0, [0x81,1], flag=0, dlc=None)
+        # canopen_DPMU_A.write_raw(0, [0x81,1], flag=0, dlc=None)
+        canopen_DPMU_A.write_raw(0, [0x81,nmtNodeId], flag=0, dlc=None)
 
     def nmt_reset_communication_event(self):
         print("nmt_reset_communication_button click")
         # nmt.set_data_byte4(0x82) #  Reset communication
         # frame = [0,0,0,0]
-        canopen_DPMU_A.write_raw(0, [0x82,1], flag=0, dlc=None)
+        # canopen_DPMU_A.write_raw(0, [0x82,1], flag=0, dlc=None)
+        canopen_DPMU_A.write_raw(0, [0x82,nmtNodeId], flag=0, dlc=None)
 
     def nmt_pre_operational_event(self):
         print("nmt_pre_operational_button click")
         # nmt.set_data_byte4(0x80) # Enter Pre-operational
         # nmt = canOD(id=0, ccs=0x0C, indexHigh=0x80, indexLow=0x01) # FIXME NOT IN OD
-        canopen_DPMU_A.write_raw(0, [0x80,1], flag=0, dlc=None)
+        # canopen_DPMU_A.write_raw(0, [0x80,1], flag=0, dlc=None)
+        canopen_DPMU_A.write_raw(0, [0x80,nmtNodeId], flag=0, dlc=None)
 
     def nmt_operational_event(self):
         print("nmt_operational_button click")
         # nmt.set_data_byte4(0x01) # Enter Operational
         # nmt = canOD(id=0, ccs=0x0C, indexHigh=0x01, indexLow=0x01) # FIXME NOT IN OD
-        canopen_DPMU_A.write_raw(0, [0x01,1], flag=0, dlc=None)
-
+        # canopen_DPMU_A.write_raw(0, [0x01,1], flag=0, dlc=None)
+        canopen_DPMU_A.write_raw(0, [0x01,nmtNodeId], flag=0, dlc=None)
+        
     def nmt_stop_event(self):
         print("nmt_stop_button click")
         # nmt.set_data_byte4(0x02) #  Enter Stop
         # nmt = canOD(id=0, ccs=0x0C, indexHigh=0x02, indexLow=0x01) # FIXME NOT IN OD
-        canopen_DPMU_A.write_raw(0, [0x02,1], flag=0, dlc=None)
+        # canopen_DPMU_A.write_raw(0, [0x02,1], flag=0, dlc=None)
+        canopen_DPMU_A.write_raw(0, [0x02,nmtNodeId], flag=0, dlc=None)
 
 
     ### HEARTBEAT
@@ -2173,7 +2220,8 @@ def can_input_event(msg):
                         
             if index == OD.I_DPMU_STATE:                
                 app.dpmuCurrentState = msg.data[4]
-                if app.dpmuCurrentState == DPMUState.Idle:
+                # if app.dpmuCurrentState == DPMUState.Idle:
+                if app.dpmuCurrentState == 0:
                     app.state_idle_button.configure(fg_color="blue")
                     #self.switches_load_event.progress_color="red"
                 else:
@@ -2183,27 +2231,31 @@ def can_input_event(msg):
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
 
-                if ( app.dpmuCurrentState in [DPMUState.TrickleChargeInit, DPMUState.TrickleChargeDelay, DPMUState.TrickleCharge] ):
+                # if  app.dpmuCurrentState in [DPMUState.TrickleChargeInit, DPMUState.TrickleChargeDelay, DPMUState.TrickleCharge]:
+                if  app.dpmuCurrentState in [4, 5, 6]:
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="blue")
-                elif ( app.dpmuCurrentState in [DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.ChargeStop] ):
+                # elif app.dpmuCurrentState in [DPMUState.ChargeInit, DPMUState.Charge, DPMUState.ChargeRamp, DPMUState.ChargeStop]:
+                elif app.dpmuCurrentState in [7, 8, 9, 22]:
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="red")
-                elif ( app.dpmuCurrentState in [DPMUState.ChargeConstantVoltageInit, DPMUState.ChargeConstantVoltage] ):
+                # elif app.dpmuCurrentState in [ int(DPMUState.ChargeConstantVoltageInit), int(DPMUState.ChargeConstantVoltage)]:
+                elif app.dpmuCurrentState in [10, 11]:    
                     app.chargingFlag = True
                     app.state_charge_button.configure(fg_color="yellow")
                 else:
                     app.state_charge_button.configure(fg_color="slategrey")
                 
-                if  app.dpmuCurrentState in [DPMUState.RegulateInit, DPMUState.RegulateVoltage]:
+                # if  app.dpmuCurrentState in [DPMUState.RegulateVoltageInit, DPMUState.RegulateVoltage]:
+                if  app.dpmuCurrentState in [140, 141]:    
                     app.state_regulate_button.configure(fg_color="red")
-                elif app.dpmuCurrentState in [DPMUState.RegulateInit, DPMUState.Regulate, DPMUState.RegulateStop]:
+                # elif app.dpmuCurrentState in [DPMUState.RegulateInit, DPMUState.Regulate, DPMUState.RegulateStop]:
+                elif app.dpmuCurrentState in [ 12, 13, 14]:
                     app.state_regulate_button.configure(fg_color="blue")
                 else:
                     app.state_regulate_button.configure(fg_color="slategrey")
                 
-                if ( app.switches_inrush_state  == False and  app.switch_input_state == True and  
-                     app.switch_load_state == True and app.switch_share_state == True):
+                if app.switches_inrush_state  == False and  app.switch_input_state == True and  app.switch_load_state == True and app.switch_share_state == True:
                     app.state_initialize_button.configure(fg_color="green")
                 else:
                     app.state_initialize_button.configure(fg_color="slategrey")
@@ -2453,6 +2505,35 @@ def can_input_event(msg):
         canOD.sdoBlockTransferOngoing = 0
         # canlog.closeDPMULogFile()
 
+def setNodeId(value):
+    heartbeat.setID(value)
+    state.setID(value)
+    reboot.setID(value)
+    switch_share.setID(value)
+    switch_load.setID(value)
+    switch_input.setID(value)
+    switch_inrush.setID(value)
+    voltages_max_allowed_dc_bus_voltage.setID(value)
+    voltages_min_allowed_dc_bus_voltage.setID(value)
+    voltages_target_voltage.setID(value)
+    voltages_dc_bus_short_circuit_limit.setID(value)
+    power_pudget_dc_input.setID(value)
+    current_max_load_current.setID(value)
+    current_max_ess_current.setID(value)
+    read_power.setID(value)
+    energy_cell.setID(value)
+    energy_bank.setID(value)
+    temperature.setID(value)
+    debuglog.setID(value)
+    canlog.setID(value)
+    log.setID(value)
+    # time.setID(value)
+    store_od.setID(value)
+    restore_od.setID(value)
+    dpmu_type_od.setID(value)
+    nodeid_od.setID(value)
+
+
 if __name__ == "__main__":
     print("DPMU: HELLO\r\n")
     nodeId = 0x67d
@@ -2492,7 +2573,8 @@ if __name__ == "__main__":
     restore_od                          = canOD(id=nodeId, ccs=0x23, indexHigh=high_byte(OD.I_RESTORE_DEFAULT_PARAMETERS), indexLow=low_byte(OD.I_RESTORE_DEFAULT_PARAMETERS), subIndex=0,
                                                 data_byte4=0x6C, data_byte5=0x6F, data_byte6=0x61, data_byte7=0x64)
     dpmu_type_od                         = canOD(id=nodeId, ccs=0x2F, indexHigh=high_byte(OD.I_DPMU_POWER_SOURCE_TYPE), indexLow=low_byte(OD.I_DPMU_POWER_SOURCE_TYPE), subIndex=0)
-
+    nodeid_od                           = canOD(id=nodeId, ccs=0x2F, indexHigh=high_byte(OD.I_SET_NODEID), indexLow=low_byte(OD.I_SET_NODEID), subIndex=0)
+    
     canopen_DPMU_A = setUpChannel(channel=0)
     canopen_DPMU_A.iocontrol.local_txecho = False
     canopen_DPMU_A_2 = setUpChannel(channel=0)
