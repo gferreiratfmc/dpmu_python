@@ -57,6 +57,7 @@ class DPMUState(Enum):
 class canOD:
     sdoBlock=0
     sdoBlockTransferOngoing=0
+    ongoingCount=0
     ackSeq=0
     
     numberOfBlocks=0
@@ -171,7 +172,9 @@ class canOD:
         self.dpmuDebugFile.flush()
         self.dpmuDebugFile.close()
         print("Number of blocks read:" + str( self.numberOfBlocks) )
+        log_box_println("Number of blocks read:" + str( self.numberOfBlocks) )
         print("DPMU Log file created:" + self.dpmuDebugFileName)
+        log_box_println("DPMU Log file created:" + self.dpmuDebugFileName + "\r\n")
 # switch_inrush = canOD()
 # switch_inrush.id = 0x601
 # switch_inrush.ccs = 0x2F # Download, n = 3 bumber of bytes without data ((Bytes 4..7), e = 1 expediated transfer, s = 1 Byte in 'n'
@@ -1925,6 +1928,24 @@ def print_can_message_raw(msg):
     except Exception as err:
         print(f"Unexpected {err=}, {type(err)=}")
         return "\r\n"
+def log_box_println(msg):
+    log_box_print( msg + "\r\n")
+
+def log_box_print(msg):
+    try:
+        # add for new line in textbox
+        string = msg
+
+        app.textbox.configure(state="normal") #writable
+        # app.textbox.insert(customtkinter.END, "ID {:03x}".format(msg.id) + " CCS {:02x}".format(msg.data[0]) + " I {:04x}".format((msg.data[2] << 8) | msg.data[1]) + " S {:02x}".format(msg.data[3]) \
+                            # + " : {:02x}".format(msg.data[4]) + " {:02x}".format(msg.data[5]) + " {:02x}".format(msg.data[6]) + " {:02x}".format(msg.data[7]) + "\r\n")
+        app.textbox.insert(customtkinter.END, string)
+        app.textbox.configure(state="disable")
+        app.textbox.see(customtkinter.END)
+        return string[:-2]
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
+        return "\r\n"
 
 class CanReceive():
     def __init__(self):
@@ -1977,8 +1998,8 @@ class CanReceive():
                         #case 0x600:
                             #print("SDO 600 " + print_can_message(msg))#msg_as_string(msg))
                         case 0x580:
-                            if 1 == canOD.sdoBlockTransferOngoing:
-                                print("SDO 580 " + print_can_message_raw(msg))
+                            # if 1 == canOD.sdoBlockTransferOngoing:
+                                # print("SDO 580 " + print_can_message_raw(msg))
                             #else:
                                 #print("SDO 580 " + print_can_message(msg))#msg_as_string(msg))
                             can_input_event(msg)
@@ -2001,15 +2022,13 @@ def sdo_block_transfer(data):
     # print("canOD.sdoBlockTransferOngoing {:01x}".format(canOD.sdoBlockTransferOngoing))
     index = (data[2] << 8) | data[1]
 
-    
-
     if 1 == canOD.sdoBlockTransferOngoing:
         messageSent = 0
         canOD.ackSeq += 1
         # print("canOD.ackSeq {:04x}".format(canOD.ackSeq))
         debuglog.writeDataToLogFile(data)
         if 0 == canOD.ackSeq%4: # block size = 4
-            print("SDO BLOCK TRANSFER DONE")
+            print("SDO BLOCK TRANSFER DONE")      
             canOD.ackSeq = data[0] & 0x7f
             # print("canOD.ackSeq: {:02x}".format(canOD.ackSeq))")
             # if OD.I_DEBUG_LOG == index:
@@ -2033,6 +2052,10 @@ def sdo_block_transfer(data):
                 # debuglog.set_data_byte7(0)
                 # debuglog.sendCanMessage()
             messageSent = 1
+            canOD.ongoingCount = canOD.ongoingCount + 1
+            if  canOD.ongoingCount%32 == 0:
+                log_box_print(".")
+                canOD.ongoingCount=0
             
         if 0x80 == data[0] & 0x80: # SDO Block transfer last segment
             canOD.sdoBlockTransferOngoing = 0
@@ -2054,8 +2077,9 @@ def sdo_block_transfer(data):
                 
                 canOD.sdoBlockTransferOngoing = 0
     else:
-        if 0xc1 == data[0] & 0xe1: # SDO Block transfer initate transfer block end
+        if 0xc1 == data[0] & 0xe1: # SDO Block transfer initiate transfer block end
             print("SDO BLOCK END")
+            log_box_println("SDO BLOCK END")
             debuglog.ccs = 0xA1
             debuglog.set_data_byte1(0)
             debuglog.set_data_byte2(0)
@@ -2464,6 +2488,7 @@ def can_input_event(msg):
                 print("S_DEBUG_LOG_READ")
                 canOD.sdoBlock = 1
                 canOD.sdoBlockTransferOngoing = 1
+                canOD.ongoingCount = 0
                 debuglog.createDPMULogFile(OD.I_DEBUG_LOG)
                 debuglog.ccs = 0xA3
                 debuglog.set_data_byte1(0)
@@ -2477,6 +2502,7 @@ def can_input_event(msg):
                 
             if index == OD.I_CAN_LOG:
                 print("I_CAN_LOG SDO BLOCK INIT")
+                log_box_println("I_CAN_LOG SDO BLOCK INIT")
                 # if OD.S_DEBUG_LOG_READ == subIndex:
                 print("S_CAN_LOG_READ")
                 canOD.sdoBlock = 1
